@@ -1,9 +1,9 @@
 RNA sequencing reveals circadian clocks may be widespread in marine zooplankton
 ================
 
-- This repository contains **data** and **scripts** from the publication "RNA sequencing reveals circadian clocks may be ubiquitous in marine zooplankton".
+- This repository contains **data** and **scripts** from the publication "RNA sequencing indicates widespread conservation of circadian clocks in marine zooplankton".
 
-- **Brief summary of the project:** we explored the _de novo_ assembled transcriptomes of a diverse set of marine zooplankton species to reveal the presence of transcripts coding for proteins that may together constitute functional circadian clocks. This was achieved by identifying candidate sequences via orthology to a select set of "bait" circadian clock protein sequences from a set of model organisms.
+- **Brief summary of the project:** we explored the _de novo_ assembled transcriptomes of a diverse set of marine zooplankton species to reveal the presence of transcripts coding for proteins that may together constitute functional circadian clocks. This was achieved by identifying candidate sequences via orthology to a select set of "bait" circadian clock protein sequences from a set of model organisms. We also annotated these transcriptomes as very little sequencing data is available for most of these species.
 
 - Note: some data from this study (sequencing reads, for example) are not hosted here, and can instead be found on the NCBI under the accession code `PRJNA824716`.
 
