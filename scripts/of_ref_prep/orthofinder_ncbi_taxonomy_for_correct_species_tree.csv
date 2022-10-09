@@ -1,0 +1,21 @@
+organism,ncbi_taxid,comments,samplename,Comments_1
+Acartia clausii,NCBI:txid136140,none,Acartia_clausiigrp_td_rfilt,NA
+Acartia tonsa,NCBI:txid136180,none,Acartia_tonsagrp_td_rfilt,NA
+Asterias rubens,NCBI:txid7604,none,Asterias_rubens_td_rfilt,NA
+Calanus helgolandicus,NCBI:txid114068,none,Calanus_helgolandicus_td_rfilt,NA
+Centropages hamatus,NCBI:txid136183,none,Centropages_hamatus_td_rfilt,NA
+Corystes sp.,NCBI:txid557246,Took related species ID since sample is not properly identified.,Corystes_sp_td_rfilt,Genus NCBI:txid557244
+Crangon crangon ,NCBI:txid491138,none,Crangon_crangon_td_rfilt,NA
+Danaus plexippus,NCBI:txid13037,External reference; arthropoda,Danaus_plexippus_UP000007151_278856_allrefs,NA
+Drosophila melanogaster,NCBI:txid7227,External reference; arthropoda,Drosophila_melanogaster_UP000000803_7227_allrefs,NA
+Evadne nordmanni,NCBI:txid141403,none,Evadne_nordmannigrp_td_rfilt,NA
+Hyperia sp.,NCBI:txid371514,Took related species ID since sample is not properly identified.,Hyperia_sp_td_rfilt,Genus NCBI:txid371513
+Magelona mirabilis,NCBI:txid46598,none,Magelona_mirabilis_td_rfilt,NA
+Mus musculus,NCBI:txid10090,External reference; mammalia,Mus_musculus_UP000000589_10090_allrefs,NA
+Oikopleura dioica,NCBI:txid34765,none,Oikopleura_dioicagrp_td_rfilt,NA
+Phialella quadrata,NCBI:txid662016,none,Phialella_quadrata_td_rfilt,NA
+Phoronis muelleri,NCBI:txid478209,none,Phoronis_muelleri_td_rfilt,NA
+Podon leuckartii,NCBI:txid141400,none,Podon_leuckartii_td_rfilt,NA
+Poecilochaetus sp.,NCBI:txid273031,Took related species ID since my sample is not properly identified.,Poecilochaetus_sp_td_rfilt,Genus NCBI:txid273030
+Rathkea octopunctata,NCBI:txid367925,none,Rathkea_octopunctata_td_rfilt,NA
+Temora longicornis,NCBI:txid261852,none,Temora_longicornisgrp_td_rfilt,NA

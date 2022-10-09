@@ -1,0 +1,18 @@
+organism,ncbi_taxid,dataset_indiv,num_readsets,sampling_time,comments
+Acartia clausii,NCBI:txid136140,2x30,2,30.07.2020,none
+Acartia tonsa,NCBI:txid136180,2x50,2,30.07.2020,none
+Asterias rubens,NCBI:txid7604,1x10,1,21.06.2018,none
+Calanus helgolandicus,NCBI:txid114068,1x1,1,21.06.2018,none
+Centropages hamatus,NCBI:txid136183,1x12,1,21.06.2018,none
+Corystes sp.,NCBI:txid557246,1x7,1,21.06.2018,Took related species ID since sample is not properly identified. Genus NCBI:txid557244
+Crangon crangon,NCBI:txid491138,1x8,1,21.06.2018,none
+Evadne nordmanni,NCBI:txid141403,2x10,2,21.06.2018,none
+Hyperia sp.,NCBI:txid371514,1x1,1,21.06.2018,Sequenced as fragments; Took related species ID since sample is not properly identified. Genus NCBI:txid371513
+Magelona mirabilis,NCBI:txid46598,1x5,1,21.06.2018,none
+Oikopleura dioica,NCBI:txid34765,1x7;1x10,2,21.06.2018,none
+Phialella quadrata,NCBI:txid662016,1x1,1,21.06.2018,none
+Phoronis muelleri,NCBI:txid478209,1x6,1,21.06.2018,none
+Podon leuckartii,NCBI:txid141400,1x10,1,21.06.2018,none
+Poecilochaetus sp.,NCBI:txid273031,1x3,1,21.06.2018,Took related species ID since my sample is not properly identified. Genus NCBI:txid273030
+Rathkea octopunctata,NCBI:txid367925,1x1,1,21.06.2018,none
+Temora longicornis,NCBI:txid261852,1x5;1x6,2,21.06.2018,none
