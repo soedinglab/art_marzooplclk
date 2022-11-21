@@ -55,7 +55,6 @@ taxdat <- read.table(paste0(mypath, "/", "species_data.csv"), sep = ",", header 
 
 #Filtering to retain non-reference species only.
 taxdat %<>% filter(!str_detect(organism, "^Danaus|^Drosophila|^Mus"))
-
 taxdat %<>% mutate(ncbi_taxid = as.numeric(str_extract(ncbi_taxid, "\\d+")))
 
 #Getting the taxonomy data from NCBI.
