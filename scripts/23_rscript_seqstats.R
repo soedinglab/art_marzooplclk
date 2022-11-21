@@ -8,6 +8,9 @@
 
 rm(list = ls())
 
+#For species-phylum associations
+library(taxize)
+
 #For tables.
 library(knitr)
 library(kableExtra)
@@ -25,13 +28,78 @@ library(magrittr)
 library(tidyr)
 library(dplyr)
 
+#Setting font family to Helvetica.
+
 
 #Main path.
-mypath <- "/path/to/outputs" #SET THIS PATH HERE.
+mypath <- "/home/owner/Nextcloud/laptop_rplace/eichele/art_marzooplclk/outputs"
 setwd(mypath)
 
 outdir <- paste0(mypath, "/", "rscript_figstabs")
 if(!dir.exists(outdir)) { dir.create(outdir) }
+
+#----------------------------------------------------------------
+
+##SPECIES GROUPING BY PHYLUM##
+
+#Reading in table of species names and NCBI taxonomy IDs I prepared manually.
+taxdat <- read.table(paste0(mypath, "/", "species_tree", "/", "species_data.csv"), sep = ",", header = TRUE)
+
+#Filtering to retain non-reference species only.
+taxdat %<>% filter(!str_detect(organism, "^Danaus|^Drosophila|^Mus"))
+taxdat %<>% mutate(ncbi_taxid = as.numeric(str_extract(ncbi_taxid, "\\d+")))
+
+#Getting the taxonomy data from NCBI.
+ncbidat <- classification(taxdat$ncbi_taxid, db = "ncbi")
+
+#Getting the phylogenetic tree for this.
+#Will continue with the tree later.
+ncbitree <- class2tree(ncbidat, check = TRUE)
+
+#Row-binding the data.frames within this list.
+ncbidat <- do.call("rbind", ncbidat)
+#Extracting the NCBI IDs into a column.
+ncbidat$ncbi_id <- rownames(ncbidat)
+rownames(ncbidat) <- NULL
+#The rank order is embedded in this column.
+ncbidat %<>% separate(ncbi_id, into = c("ncbi_taxid", "rord"), sep = "\\.")
+
+#Will keep the following taxonomic ranks.
+#kingdom, phylum, class/subclass, order, family, genus, species.
+#Animalia > Arthropoda > Copepoda > Calanoida > Temoridae > Temora > Temora longicornis
+ncbidat %<>% 
+  filter((rank %in% c("kingdom", "phylum", "class", "subclass", 
+                      "order", "family", "genus", "species")))
+
+#Dropping ID column, and pivoting wider.
+ncbidat %<>%
+  group_by(ncbi_taxid) %>%
+  arrange(rord, .by_group = TRUE) %>%
+  ungroup() %>%
+  select(-c(id, rord)) %>%
+  pivot_wider(names_from = rank, values_from = name)
+
+#Merging this with my sample data.
+taxdat %<>% select(-c(comments))
+taxdat <- merge(taxdat, ncbidat, by = "ncbi_taxid", all.x = TRUE)
+rm(ncbidat)
+
+#Mutating phylum into a compact 2 letter code
+taxdat %<>% mutate(phylum = str_extract(phylum, "^[A-Za-z]{2}"))
+taxdat %<>% select(c(organism, phylum))
+
+#Ordering taxdat to match tree.
+taxdat$organism <- factor(taxdat$organism, 
+                          levels = c("Acartia tonsa", "Acartia clausii", "Calanus helgolandicus", 
+                                     "Centropages hamatus", "Temora longicornis", "Crangon crangon", 
+                                     "Corystes sp.", "Hyperia sp.", "Podon leuckartii", "Evadne nordmanni", 
+                                     "Poecilochaetus sp.", "Magelona mirabilis", "Phoronis muelleri", 
+                                     "Oikopleura dioica", "Asterias rubens", "Rathkea octopunctata", 
+                                     "Phialella quadrata"))
+
+names(taxdat) <- c("disp_org", "disp_phy")
+taxdat %<>% arrange(disp_org)
+taxdat %<>% mutate(ord = row_number())
 
 #----------------------------------------------------------------
 
@@ -67,7 +135,6 @@ annotsdat <- fread(list.files(annotsdir, pattern = "_stats.tsv$", full.names = T
 
 
 #----------------------------------------------------------------
-
 
 
 #Will start by munging the reads data table.
@@ -126,10 +193,22 @@ readstab %<>% filter(procstep %in% c("raw", "smr"))
 
 #READS COUNTS PLOT FOR PRESENTATION.
 
-
+# readstab$sample <- factor(readstab$sample, 
+#                           levels = c("Acartia_tonsagrp", "Acartia_clausiigrp", "Calanus_helgolandicus", 
+#                                      "Centropages_hamatus", "Temora_longicornisgrp", "Crangon_crangon", 
+#                                      "Corystes_sp", "Hyperia_sp", "Podon_leuckartii", "Evadne_nordmannigrp", 
+#                                      "Poecilochaetus_sp", "Magelona_mirabilis", "Phoronis_muelleri", 
+#                                      "Oikopleura_dioicagrp", "Asterias_rubens", "Rathkea_octopunctata", 
+#                                      "Phialella_quadrata"))
 
 #Plot version
 readsplt <- readstab
+
+#Munging to add in the disp_org and disp_phy data from taxdat
+#So that this table can be ordered according to the cladogram.
+readsplt %<>% mutate(disp_org = str_replace(str_replace(sample, "_", " "), "grp$", ""), 
+                     disp_org = ifelse(str_detect(disp_org, " sp$"), paste0(disp_org, "."), disp_org))
+readsplt %<>% full_join(taxdat, by = "disp_org")
 
 xloc_init <- readsplt %>% filter(procstep == "raw") %>% summarize(mean = round(mean(num_seqs)/1000000))
 xloc_init <- as.numeric(xloc_init)
@@ -138,11 +217,12 @@ xloc_fin <- as.numeric(xloc_fin)
 
 
 plt <- readsplt %>% 
-  arrange(sample) %>%
+  arrange(ord) %>%
   mutate(sample = str_replace(sample, "grp$", ""), 
          sample = str_replace(sample, "_", " "), 
-         sample = ifelse(str_detect(sample, "sp$"), paste0(sample, "."), sample)) %>%
-  ggplot(mapping = aes(x = num_seqs/1000000, y = reorder(sample, desc(sample)), fill = procstep)) + 
+         sample = ifelse(str_detect(sample, "sp$"), paste0(sample, "."), sample), 
+         sample = paste0("(", disp_phy, ") ", sample)) %>%
+  ggplot(mapping = aes(x = num_seqs/1000000, y = reorder(sample, desc(ord)), fill = procstep)) + 
   geom_bar(stat = "identity", position = "identity", alpha = 0.5) + 
   scale_x_continuous(labels = scales::comma, breaks = scales::breaks_extended(n = 10)) + 
   #VLINE+TEXT FOR INITIAL READS.
@@ -203,10 +283,11 @@ readstab %<>% mutate(sample = str_replace(sample, "grp$", ""))
 
 #I want to add in the transcriptome assembly stats from annotsdat here.
 #That will be presented as its own table.
-assemtab <- annotsdat %>% select(c(sample, nseqs_initial, nseqs_final, n50_initial, n50))
+assemtab <- annotsdat %>% select(c(sample, nseqs_initial, nseqs_final, perc_cmp_final, n50_initial, n50))
 
 #Merging
 assemtab <- merge(readstab, assemtab, by = "sample", all.x = TRUE, all.y = TRUE)
+
 
 #Prepping some columns
 #Mainly adding percentage representations to columns that are "derived"
@@ -217,17 +298,24 @@ assemtab %<>%
   mutate(smr = paste0(smr, " (", round(smr/raw*100, 1), ")")) %>%
   mutate(nseqs_final = paste0(nseqs_final, " (", round(nseqs_final/nseqs_initial*100, 1), "; ", round(perc_cmp_final*100, 1), ")"))
   
+
+#Merging in taxdat and sorting by that and adding phylum data.
+assemtab %<>% mutate(disp_org = sample) %>% full_join(taxdat, by = "disp_org") %>% select(-disp_org)
+
+
 #Writing out this latex table.
 genft <- "Numbers in parentheses indicate percentage value of that column w.r.t. its counterpart."
 assemtab_out <- assemtab %>%
-  rename("Organism" = sample, "Raw" = raw, "Processed" = smr, 
+  arrange(ord) %>% 
+  select(c(sample, disp_phy, raw, smr, nseqs_initial, nseqs_final, n50_initial, n50)) %>%
+  rename("Organism" = sample, "Phylum" = disp_phy, "Raw" = raw, "Processed" = smr, 
          "Initial" = nseqs_initial, "Final" = nseqs_final,
          "N50 (initial)" = n50_initial, "N50 (final)" = n50) %>%
-  kbl(., format = "latex", booktabs = T, align = "lcccccc", linesep = "") %>%
+  kbl(., format = "latex", booktabs = T, align = "lccccccc", linesep = "") %>%
   kable_styling(position = "center", latex_options = c("scale_down")) %>%
   row_spec(row = 0, italic = FALSE, bold = TRUE) %>%
   column_spec(column = 1, italic = TRUE) %>%
-  add_header_above(c(" " = 1, "Number of reads" = 2, "Transcripts in assembly" = 2, "N50" = 2), bold = TRUE) %>%
+  add_header_above(c(" " = 2, "Number of reads" = 2, "Transcripts in assembly" = 2, "N50" = 2), bold = TRUE) %>%
   footnote(general = genft, threeparttable = T)
 
 assemtab_out
@@ -250,6 +338,14 @@ rm(assemtab_out, genft)
 
 #ASSEMBLY STATISTICS FIGURE FOR PRESENTATION
 assemtab <- annotsdat %>% select(c(sample, nseqs_initial, nseqs_final, n50_initial, n50))
+
+#Merging in the taxdat data to order stuff properly.
+assemtab %<>% mutate(disp_org = str_replace(str_replace(sample, "_", " "), "grp$", ""), 
+                disp_org = ifelse(str_detect(disp_org, " sp$"), paste0(disp_org, "."), disp_org)) %>%
+  full_join(taxdat, by = "disp_org")
+
+#Need to mutate nseqs_initial into character.
+#assemtab %<>% mutate(nseqs_initial = as.character(nseqs_initial))
 
 #Pivoting longer..
 #Need a spec for this.
@@ -296,24 +392,31 @@ xloc_vdfnf_init <- as.numeric(xloc_vdfnf_init)
 xloc_vdfnf_fin <- vdfnf %>% filter(seq_set == "final") %>% summarize(mean = round(mean(count)))
 xloc_vdfnf_fin <- as.numeric(xloc_vdfnf_fin)
 
+# assemtab %<>% mutate(seq_set = factor(seq_set, 
+#                                       levels = ifelse(stat == "n50", 
+#                                                       c("initial", "final"), 
+#                                                       c("final", "initial"))))
+
+assemtab %<>% mutate(fctord = ifelse(stat == "n50", count, count))
 
 #PLOTTING
 plt <- assemtab %>% 
   mutate(sample = str_replace(sample, "_", " "), 
          sample = ifelse(str_detect(sample, "sp$"), paste0(sample, "."), sample),
-         sample = reorder(sample, desc(sample))) %>%
-  group_by(sample, stat) %>%
+         sample = reorder(sample, desc(sample)), 
+         sample = paste0("(", disp_phy, ") ", sample)) %>%
+  group_by(disp_phy, sample, stat) %>%
   #arrange(ifelse(stat == "assem", rev(desc(seq_set)), seq_set), .by_group = TRUE) %>%
   #Arranging by desc(count) ensures that the value in the overlapping bars with the
   #lower value gets plotted to the front.
   arrange(desc(count), .by_group = TRUE) %>%
   #arrange(seq_set, .by_group = TRUE) %>%
   #ungroup() %>%
-  ggplot(aes(x = count, y = sample, fill = seq_set)) + 
+  ggplot(aes(x = count, y = reorder(sample, desc(ord)), fill = seq_set)) + 
   geom_bar(stat = "identity", position = "identity", alpha = 0.5) + 
   scale_x_continuous(labels = scales::comma, breaks = scales::breaks_extended(n = 10)) + 
   scale_fill_manual(values = c("#009b57", "#ff3f0d"),
-                    name = "Assembly", , 
+                    name = "Assembly",
                     labels = c("Final", "Initial")) + 
   facet_wrap(~stat, scales = "free_x", 
              strip.position = "bottom", 
@@ -387,7 +490,9 @@ rm(assemtab)
 #ANNOTATIONS FIGURE FOR PRESENTATION.
 
 #For this, I want nseqs_final, mean_protlen, swissprot_annots, eggnogmapper_annots, miss_annots.
-annotstab <- annotsdat %>% select(c(sample, mean_protlen, nseqs_final, swissprot_annots, eggnogmapper_annots, miss_annots))
+annotstab <- annotsdat %>% select(c(sample, mean_protlen, nseqs_final, 
+                                    annots_swissprot_only, annots_eggnog_only, 
+                                    annots_both, miss_annots))
 
 #Setting up the sample names.
 annotstab %<>% mutate(sample = str_replace(sample, "_", " "), 
@@ -398,7 +503,7 @@ annotstab %<>% mutate(sample = str_replace(sample, "_", " "),
 annotstab %<>% pivot_longer(cols = -sample, names_to = "stat", values_to = "count")
 
 #Setting order for the stat column.
-mylvls <- c("miss_annots", "swissprot_annots", "eggnogmapper_annots", "nseqs_final", "mean_protlen")
+mylvls <- c("miss_annots", "annots_both", "annots_swissprot_only", "annots_eggnog_only", "nseqs_final", "mean_protlen")
 #mylvls <- c("mean_protlen", "nseqs_final", "swissprot_annots", "eggnogmapper_annots", "miss_annots")
 annotstab %<>% mutate(stat = factor(stat, levels = mylvls))
 
@@ -409,65 +514,72 @@ meantab <- annotstab %>%
   filter(stat != "mean_protlen") %>%
   group_by(stat) %>% 
   summarize(mean = round(mean(count))) %>%
-  mutate(meanperc = round(mean/mean[4]*100, 0)) %>%
+  mutate(meanperc = round(mean/mean[5]*100, 0)) %>%
   mutate(mean = ifelse(meanperc == 100, paste0(mean, " (", meanperc, "%)"), paste0(mean, "  (", meanperc, "%)"))) %>%
   select(-meanperc) %>%
   dplyr::arrange(-dplyr::row_number()) %>%
   mutate(stat = case_when(
     stat == "nseqs_final" ~ "Total sequences", 
-    stat == "eggnogmapper_annots" ~ "eggnog-mapper annotations", 
-    stat == "swissprot_annots" ~ "Swiss-Prot annotations",
+    stat == "annots_eggnog_only" ~ "eggnog-mapper annotations", 
+    stat == "annots_swissprot_only" ~ "Swiss-Prot annotations",
+    stat == "annots_both" ~ "Annotated by both",
     stat == "miss_annots" ~ "Unannotated")) %>%
   #Padding stat column values if not they get center aligned in inset table
   mutate(stat = str_pad(stat, width = max(nchar(stat)), side = "right"), 
          mean = str_pad(mean, width = max(nchar(mean)), side = "left")) %>%
   rename(" " = stat, "Mean counts" = mean)
 
-meantab<- tibble(x = max(annotstab$count)+4000, 
-                 y = round(length(unique(annotstab$sample))+0.5, 0),
-                 #y = 0, 
+meantab <- tibble(x = max(annotstab$count)+4000, 
+                  #y = round(length(unique(annotstab$sample))+0.9, 0),
+                 y = 2.4, 
                  tb = list(meantab))
 
+#Adding in the data from taxdat to arrange the species phylogenetically.
+annotstab %<>% mutate(disp_org = sample) %>% full_join(taxdat, by = "disp_org") %>% select(-disp_org)
+annotstab %<>% mutate(sample = paste0(sample, " (", disp_phy, ")"))
 
 #Plotting.
 plt <- annotstab %>%
+  #filter(!(stat %in% c("mean_protlen", "nseqs_final"))) %>%
   group_by(sample) %>%
-  arrange(stat) %>%
-  ggplot(mapping = aes(x = count, y = sample, fill = stat)) +
-  geom_bar(position = "identity", stat = "identity", alpha = 0.5, 
-           data = annotstab[annotstab$stat == "nseqs_final", ]) + 
-  geom_bar(position = "dodge", stat = "identity", alpha = 0.8, 
-           data = annotstab[!(annotstab$stat %in% c("nseqs_final", "mean_protlen")),]) + 
+  arrange(stat, .by_group = TRUE) %>%
+  ggplot(mapping =  aes(x = count, y = reorder(sample, desc(ord)), fill = stat)) + 
+  geom_bar(data = annotstab[!(annotstab$stat %in% c("nseqs_final", "mean_protlen")),], 
+           position = "stack", stat = "identity") +
+  scale_fill_manual(breaks = c("annots_eggnog_only", "annots_swissprot_only", "annots_both", "miss_annots"), 
+                    values = c("#33a02c", "#ff3f0d", "#1f73b2", "gray", "black"),
+                    name = " ", 
+                    labels = c("eggnog-mapper annotations", "Swiss-Prot annotations", "Annotated by both", "Unannotated")) + 
+  scale_x_continuous(labels = scales::comma, breaks = scales::breaks_extended(n = 10)) +
   geom_text(data = annotstab[annotstab$stat == "mean_protlen", ], 
             mapping = aes(y = sample, 
                           x = annotstab[annotstab$stat == "nseqs_final", ]$count, 
                           label = round(count, 0)), 
-            hjust = 1.2, fontface = "bold", size = 10) + 
-  scale_fill_manual(breaks = c("eggnogmapper_annots", "swissprot_annots", "miss_annots", "nseqs_final"), 
-                    values = c("#33a02c", "#1f73b2", "#ff3f0d", "gray", "black"),
-                    name = " ", 
-                    labels = c("eggnog-mapper annotations", "Swiss-Prot annotations", "Unannotated", "Total sequences")) + 
-  scale_x_continuous(labels = scales::comma, breaks = scales::breaks_extended(n = 10)) +
+            hjust = 1.2, fontface = "bold", size = 10) +
   theme_classic() + 
   theme(legend.position = "top",
-        legend.text = element_text(size = 16),
+        legend.text = element_text(size = 20),
         text = element_text(size = 20, face = "bold"), 
         axis.text.y = element_text(face = "bold.italic", size = 20), 
         #axis.text.x = element_text(angle = 45, vjust = 0.5), 
-        plot.title = element_text(hjust = 0.5), legend.justification = "center") +
+        plot.title = element_text(hjust = -0.5), legend.justification = "center", 
+        #axis.line.y = element_blank(), axis.ticks.y = element_blank()
+        ) +
   #guides(fill = guide_legend(nrow = 2)) + 
   #theme_classic() + 
   ylab("") + 
-  xlab("") +
+  xlab("Number of proteins") + 
   geom_table(data = meantab, 
              aes(x = x, y = y, label = tb),
              table.theme = ttheme_gtminimal(base_family = "mono", base_size = 20)) +
   annotate(geom = "text", parse = TRUE,
            label = 'bold("Inset numbers in gray bars:\nMean protein lengths")', 
-           x = max(annotstab$count)-4000, y = 1, size = 8) #+ 
-  #labs(title = "Functional annotation metrics")
-
+           x = max(annotstab$count)-9700, y = 1, size = 8) #+ 
+#labs(title = "Functional annotation metrics")
+  
+#
 plt
+
 
 #Saving PNG.
 #outfile <- "all_annots_stats_plot.png"
@@ -495,7 +607,9 @@ rm(annotstab)
 #ANNOTATIONS TABLE.
 
 #For this, I want nseqs_final, mean_protlen, swissprot_annots, eggnogmapper_annots, miss_annots.
-annotstab <- annotsdat %>% select(c(sample, mean_protlen, nseqs_final, swissprot_annots, eggnogmapper_annots, miss_annots))
+annotstab <- annotsdat %>% select(c(sample, mean_protlen, nseqs_final, 
+                                    annots_swissprot_only, annots_eggnog_only, 
+                                    annots_both, miss_annots))
 
 #Setting up the sample names.
 annotstab %<>% mutate(sample = str_replace(sample, "_", " "), 
@@ -508,23 +622,34 @@ annotstab %<>% mutate(mean_protlen = round(mean_protlen, 0))
 
 #Getting percentages and adding them to the respective columns.
 annotstab %<>%
-  mutate(swissprot_annots = paste0(swissprot_annots, " (", round(swissprot_annots/nseqs_final*100, 0), "%)"), 
-         eggnogmapper_annots = paste0(eggnogmapper_annots, " (", round(eggnogmapper_annots/nseqs_final*100, 0), "%)"), 
-         miss_annots = paste0(miss_annots, " (", round(miss_annots/nseqs_final*100, 0), "%)")  )
+  mutate(annots_swissprot_only = paste0(annots_swissprot_only, " (", round(annots_swissprot_only/nseqs_final*100, 0), "%)"), 
+         eggnogmapper_annots = paste0(annots_eggnog_only, " (", round(annots_eggnog_only/nseqs_final*100, 0), "%)"), 
+         annots_both = paste0(annots_both, " (", round(annots_both/nseqs_final*100, 0), "%)"), 
+         miss_annots = paste0(miss_annots, " (", round(miss_annots/nseqs_final*100, 0), "%)"))
 
 #Rearranding columns a bit.
-annotstab %<>% select(c(sample, nseqs_final, mean_protlen, eggnogmapper_annots, swissprot_annots, miss_annots))
+annotstab %<>% select(c(sample, nseqs_final, mean_protlen, annots_eggnog_only, 
+                        annots_swissprot_only, annots_both, miss_annots))
+
+#Adding in the data from taxdat to arrange the species phylogenetically.
+annotstab %<>% mutate(disp_org = sample) %>% full_join(taxdat, by = "disp_org") %>% select(-disp_org)
+#annotstab %<>% mutate(sample = paste0(sample, " (", disp_phy, ")"))
+
 
 #Writing out this latex table.
 genft <- "Percentage values calculated as fraction of total sequences from column 2."
 annotstab_out <- annotstab %>%
-  rename("Organism" = sample, "Num. proteins" = nseqs_final, "Mean length" = mean_protlen, 
-         "eggnog-mapper" = eggnogmapper_annots, "Swiss-Prot" = swissprot_annots, "Unannotated" = miss_annots) %>%
-  kbl(., format = "latex", booktabs = T, align = "lcccccc", linesep = "") %>%
+  arrange(ord) %>%
+  select(c(sample, disp_phy, nseqs_final, mean_protlen, annots_eggnog_only, 
+           annots_swissprot_only, annots_both, miss_annots)) %>% 
+  rename("Organism" = sample, "Phylum" = disp_phy, "Num. proteins" = nseqs_final, "Mean length" = mean_protlen, 
+         "eggnog-mapper" = annots_eggnog_only, "Swiss-Prot" = annots_swissprot_only, 
+         "By both" = annots_both, "Unannotated" = miss_annots) %>%
+  kbl(., format = "latex", booktabs = T, align = "lccccccc", linesep = "") %>%
   kable_styling(position = "center", latex_options = c("scale_down")) %>%
   row_spec(row = 0, italic = FALSE, bold = TRUE) %>%
   column_spec(column = 1, italic = TRUE) %>%
-  add_header_above(c(" " = 3, "Number of proteins annotated" = 3), bold = TRUE) %>%
+  add_header_above(c(" " = 4, "Number of proteins annotated" = 4), bold = TRUE) %>%
   footnote(general = genft, threeparttable = T)
 
 annotstab_out
@@ -603,7 +728,7 @@ bustab %<>% filter(procstep %in% c("trinity", "td_trinity", "rfilt", "rscript_le
 #Combining the busset and ngenes columns since they represent facet panels
 bustab %<>% 
   mutate(busset = case_when(
-    busset == "euk" ~ "BUSCO Eukaryota", 
+    busset == "euk" ~ "BUSCO Metazoa", 
     busset == "arth" ~ "BUSCO Arthropoda"))
 
 #Will extract the BUSCO dataset's gene count number and attach it to busset
@@ -773,7 +898,7 @@ buscat_busc_lvls <- c("Complete", "Single-copy (Complete)", "Duplicated (Complet
 buscat_lvls <- c(buscat_busc_lvls, "Read support")
 qualdat %<>% mutate(procstep = factor(procstep, levels = c("Initial assembly", "Final assembly")), 
                     buscat = factor(buscat, levels = buscat_lvls), 
-                    busset = factor(busset, levels = c("BUSCO Arthropoda (n = 1013)", "BUSCO Eukaryota (n = 255)", 
+                    busset = factor(busset, levels = c("BUSCO Arthropoda (n = 1013)", "BUSCO Metazoa (n = 954)", 
                                                        "Bowtie2 read support")))
 rm(buscat_busc_lvls, buscat_lvls)
 
@@ -808,9 +933,14 @@ qualdat %<>%
   ungroup()
 
 
+#Adding in the data from taxdat to arrange the species phylogenetically.
+qualdat %<>% mutate(disp_org = sample) %>% full_join(taxdat, by = "disp_org") %>% select(-disp_org)
+qualdat %<>% mutate(sample = paste0(sample, " (", disp_phy, ")"))
+
+
 #PLOTTING.
 plt <- qualdat %>%
-  ggplot(aes(x = count, y = sample, fill = buscat)) +
+  ggplot(aes(x = count, y = reorder(sample, desc(ord)), fill = buscat)) +
   geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) + 
   facet_grid(procstep ~ busset, switch = "y", space = "free", shrink = FALSE) + 
   geom_vline(mapping = aes(xintercept = mean), linetype = "dashed", color = "black", size = 1, alpha = 1.0) + 
@@ -873,3 +1003,43 @@ rm(qualdat)
 
 #----------------------------------------------------------------
 
+
+
+
+#Backup different version of annotations plot.
+# plt <- annotstab %>%
+#   group_by(sample) %>%
+#   arrange(stat) %>%
+#   ggplot(mapping = aes(x = count, y = sample, fill = stat)) +
+#   geom_bar(position = "identity", stat = "identity", alpha = 0.5, 
+#            data = annotstab[annotstab$stat == "nseqs_final", ]) + 
+#   geom_bar(position = "dodge", stat = "identity", alpha = 0.8, 
+#            data = annotstab[!(annotstab$stat %in% c("nseqs_final", "mean_protlen")),]) + 
+#   geom_text(data = annotstab[annotstab$stat == "mean_protlen", ], 
+#             mapping = aes(y = sample, 
+#                           x = annotstab[annotstab$stat == "nseqs_final", ]$count, 
+#                           label = round(count, 0)), 
+#             hjust = 1.2, fontface = "bold", size = 10) + 
+#   scale_fill_manual(breaks = c("eggnogmapper_annots", "swissprot_annots", "miss_annots", "nseqs_final"), 
+#                     values = c("#33a02c", "#1f73b2", "#ff3f0d", "gray", "black"),
+#                     name = " ", 
+#                     labels = c("eggnog-mapper annotations", "Swiss-Prot annotations", "Unannotated", "Total sequences")) + 
+#   scale_x_continuous(labels = scales::comma, breaks = scales::breaks_extended(n = 10)) +
+#   theme_classic() + 
+#   theme(legend.position = "top",
+#         legend.text = element_text(size = 16),
+#         text = element_text(size = 20, face = "bold"), 
+#         axis.text.y = element_text(face = "bold.italic", size = 20), 
+#         #axis.text.x = element_text(angle = 45, vjust = 0.5), 
+#         plot.title = element_text(hjust = 0.5), legend.justification = "center") +
+#   #guides(fill = guide_legend(nrow = 2)) + 
+#   #theme_classic() + 
+#   ylab("") + 
+#   xlab("") +
+#   geom_table(data = meantab, 
+#              aes(x = x, y = y, label = tb),
+#              table.theme = ttheme_gtminimal(base_family = "mono", base_size = 20)) +
+#   annotate(geom = "text", parse = TRUE,
+#            label = 'bold("Inset numbers in gray bars:\nMean protein lengths")', 
+#            x = max(annotstab$count)-4000, y = 1, size = 8) #+ 
+# #labs(title = "Functional annotation metrics")

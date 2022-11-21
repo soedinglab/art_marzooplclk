@@ -7,13 +7,19 @@
 rm(list = ls())
 
 #Base path for this working directory.
-mypath <- "/path/to/outputs" #SET THIS PATH HERE.
+#mypath <- "/home/mpg08/vraghav/rscript_ccvissum"
+mypath <- "/home/owner/Nextcloud/laptop_rplace/eichele/art_marzooplclk"
 #All relevant data--and this script--are located here.
 
 #Setting working directory.
 setwd(mypath)
 
 
+#For phylogenetic ordering of samples during plotting
+library(taxize)
+#For ordering the sample names according to the phylogenetic
+#tree order in the plots.
+library(forcats)
 
 #Uses the seqvisr package from GitHub, so install if necessary.
 #devtools::install_github("vragh/seqvisr", force = TRUE)
@@ -127,6 +133,47 @@ rm(ipspath_cands, ipsnames_cands, ipsnames_cands_sites)
 
 
 
+
+#Also have othannots_ofrefs and othannots_ofcands directories
+#containing sequence bias composition and NLS annotations.
+#(fLPS and NLStradamus respectively.)
+#oth_refs <- paste0(mypath, "/othannots_ofrefs")
+#fLPS
+#flps_refs <- bind_rows(lapply(list.files(oth_refs, pattern = "_flps.tab", full.names = TRUE), 
+#                    function(x){df <- fread(x, skip = 4); df$filename <- x; return(df)}))
+#names(flps_refs) <- c("seq", "bias", "lps", "start", 
+#                "end", "res_count", "binom_p", "sig_desc", "filename")
+#NLStradamus
+#nls_refs <- fast_fread(locpath = oth_refs, locpattern =  "_nls.tab")
+#names(nls_refs) <- c("seq", "algo", "score", "start", "stop", "actseq", "filename")
+#rm(oth_refs)
+
+#CANDIDATES.
+#oth_cands <- paste0(mypath, "/othannots_ofcands")
+#fLPS
+#flps_cands <- bind_rows(lapply(list.files(oth_cands, pattern = "_flps.tab", full.names = TRUE), 
+#                               function(x){df <- fread(x, skip = 4); df$filename <- x; return(df)}))
+#names(flps_cands) <- c("seq", "bias", "lps", "start", 
+#                       "end", "res_count", "binom_p", "sig_desc", "filename")
+#NLStradamus
+#nls_cands <- fast_fread(locpath = oth_cands, locpattern =  "_nls.tab")
+#names(nls_cands) <- c("seq", "algo", "score", "start", "stop", "actseq", "filename")
+#rm(oth_cands)
+
+#Since these respective flps and nls annotations for candidates and references can be
+#merged, doing so now.
+#flps <- bind_rows(flps_refs, flps_cands)
+#nls <- bind_rows(nls_refs, nls_cands)
+#rm(flps_cands, flps_refs, nls_cands, nls_refs)
+
+
+#Path to Pfam-A clans table.
+#Need this to get the short identifiers for the Pfam domains for identification.
+#pfamannot <- paste0(mypath, "/", "Pfam-A.clans.tsv")
+#pfamannot <- data.table::fread(pfamannot, header = FALSE)
+
+
+
 #--------------------------------------------------------------------------------
 
 #Output directory for visualizations and stuff.
@@ -138,6 +185,79 @@ if(!dir.exists(visoutdir)) { dir.create(visoutdir) }
 #--------------------------------------------------------------------------------
 
 
+##SPECIES GROUPING BY PHYLUM##
+
+#Reading in table of species names and NCBI taxonomy IDs I prepared manually.
+taxdat <- read.table(paste0(mainoutdir, "/", "species_tree", "/", "species_data.csv"), sep = ",", header = TRUE)
+
+#Filtering to retain non-reference species only.
+taxdat %<>% filter(!str_detect(organism, "^Danaus|^Drosophila|^Mus"))
+taxdat %<>% mutate(ncbi_taxid = as.numeric(str_extract(ncbi_taxid, "\\d+")))
+
+#Getting the taxonomy data from NCBI.
+ncbidat <- classification(taxdat$ncbi_taxid, db = "ncbi")
+
+#Getting the phylogenetic tree for this.
+#Will continue with the tree later.
+ncbitree <- class2tree(ncbidat, check = TRUE)
+
+#Row-binding the data.frames within this list.
+ncbidat <- do.call("rbind", ncbidat)
+#Extracting the NCBI IDs into a column.
+ncbidat$ncbi_id <- rownames(ncbidat)
+rownames(ncbidat) <- NULL
+#The rank order is embedded in this column.
+ncbidat %<>% separate(ncbi_id, into = c("ncbi_taxid", "rord"), sep = "\\.")
+
+#Will keep the following taxonomic ranks.
+#kingdom, phylum, class/subclass, order, family, genus, species.
+#Animalia > Arthropoda > Copepoda > Calanoida > Temoridae > Temora > Temora longicornis
+ncbidat %<>% 
+  filter((rank %in% c("kingdom", "phylum", "class", "subclass", 
+                      "order", "family", "genus", "species")))
+
+#Dropping ID column, and pivoting wider.
+ncbidat %<>%
+  group_by(ncbi_taxid) %>%
+  arrange(rord, .by_group = TRUE) %>%
+  ungroup() %>%
+  select(-c(id, rord)) %>%
+  pivot_wider(names_from = rank, values_from = name)
+
+#Merging this with my sample data.
+taxdat %<>% select(-c(comments))
+taxdat <- merge(taxdat, ncbidat, by = "ncbi_taxid", all.x = TRUE)
+rm(ncbidat)
+
+#Mutating phylum into a compact 2 letter code
+taxdat %<>% mutate(phylum = str_extract(phylum, "^[A-Za-z]{2}"))
+taxdat %<>% select(c(organism, phylum))
+
+#Ordering taxdat to match tree.
+taxdat$organism <- factor(taxdat$organism, 
+                          levels = c("Acartia tonsa", "Acartia clausii", "Calanus helgolandicus", 
+                                     "Centropages hamatus", "Temora longicornis", "Crangon crangon", 
+                                     "Corystes sp.", "Hyperia sp.", "Podon leuckartii", "Evadne nordmanni", 
+                                     "Poecilochaetus sp.", "Magelona mirabilis", "Phoronis muelleri", 
+                                     "Oikopleura dioica", "Asterias rubens", "Rathkea octopunctata", 
+                                     "Phialella quadrata"))
+
+names(taxdat) <- c("disp_org", "disp_phy")
+taxdat %<>% arrange(disp_org)
+taxdat %<>% mutate(ord = row_number())
+
+
+#Integrating phylogenetic orer data into visout
+#visout %<>% mutate(disp_org = str_extract(seq, "^[A-Za-z]+\\s[a-z\\.]+"), 
+#                  disp_org = ifelse(str_detect(disp_org, "\\ssp$"), paste0(disp_org, "."), disp_org)) %>%
+#  full_join(taxdat, by = "disp_org") %>% 
+#  mutate(seq = ifelse(str_detect(seq, "REF"), seq, paste0(seq, " (", disp_phy, ")")))
+#Need to set the reference as ord = 0 to make sure it shows up on top.
+#visout %<>% mutate(ord = ifelse(str_detect(seq, "REF"), 0, ord))
+
+#----------------------------------------------------------------
+
+
 #For confirming that the OrthoFinder approach actually works, I will use the
 #reference vs. reference matches.
 
@@ -147,6 +267,15 @@ refconf <- ccdf %>%
   select(c(protcat, refseq, matchseq, spmatch))
 
 
+#Notice NR1D1 is not here as it is has no ortholog in Drosophila or Danaus.
+#So fill it in from a SOIREF__TRINITY match in ccdf.
+#nr1d1 <- ccdf %>% filter(protcat == "NR1D1") %>% select(protcat, refseq, matchseq, spmatch) %>%
+#  distinct(refseq, .keep_all = TRUE)
+#nr1d1$matchseq <- NA
+#nr1d1$spmatch <- NA
+#Filling in.
+#refconf <- bind_rows(refconf, nr1d1)
+#rm(nr1d1)
 
 
 #Extracting protein match category and UniProt accession.
@@ -170,7 +299,8 @@ refconf %<>%
 #refconf %<>% mutate(spmatch = str_replace(spmatch, "(?<=^[A-Z])[a-z]+_", ". "))
 refconf$spmatch <- gsub("(^[A-Z]).*_([a-z]).*$", "\\1\\2", refconf$spmatch)
 
-
+#Fixing that NA (NA) thing in NR1D1's matchcat cell.
+#refconf$matchcat[refconf$protcat == "NR1D1"] <- NA
 
 #Grouping each match species by protcat into a single row.
 refconf %<>% 
@@ -208,6 +338,8 @@ refconf %<>% mutate(ttfl_loop = case_when(
   str_detect(protcat,  "REV\\-ERBa|RORa") ~ "Mammalian"
 ))
 
+#Fixing that NA (NA) thing in NR1D1's matchcat cell.
+#refconf$matchcat[refconf$protcat == "NR1D1"] <- NA
 
 
 #Making protcat a factor column because I want the proteins grouped by
@@ -224,13 +356,12 @@ refconf %<>% select(c(protcat, ttfl_loop, refseq, matchcat))
 #Quick glane.
 refconf
 
-
 #Building the latex table for export.
 #I will handle the italicization manually.
 genft <- "Species: Dm - Drosophila melanogaster, Dp - Danaus plexippus, Mm - Mus musculus. Protein name abbreviations: CLK (Circadian locomotor output cycles kaput), CYC (Cycle), PER (period), TIM (Timeless), CRY1 (Cryptochrome 1), CRY2 (Cryptochrome 2), PDP1e (PAR Domain Protein 1 epsilon), VRI (Vrille), REV-ERBa (NR1D1/Nuclear Receptor Subfamily 1 Group D Member 1), RORa (RAR Related Orphan Receptor A; NR1F1/Nuclear receptor subfamily 1 group F member 1), NPAS2 (Neuronal PAS Domain Protein 2), ARNTL (Aryl hydrocarbon Receptor Nuclear Translocator-Like protein), DBP (D-box Binding Protein), HLF (Hepatic Leukemia Factor), TEF (Thyrotroph Embryonic Factor), NFIL3 (Nuclear Factor, Interleukin 3 Regulated), EIP75B (Ecdysone-induced protein 75B, isoforms C/D; NR1D3), HR3 (Probable nuclear hormone receptor HR3). PER1, PER2, and PER3 are in-paralogs. ARNTL1 and ARNTL2 are in-paralogs."
 refconf_tab <- refconf %>%
   select(-protcat) %>%
-  rename("TTFL" = ttfl_loop, "Reference" = refseq, "Ref. proteome match" = matchcat) %>%
+  dplyr::rename("TTFL" = ttfl_loop, "Reference" = refseq, "Ref. proteome match" = matchcat) %>%
   kbl(., format = "latex", booktabs = T, align = "lll", linesep = "") %>%
   #kable_styling(latex_options = c("scale_down"), position = "center", full_width = TRUE) %>%
   #kable_styling(position = "center", protect_latex = TRUE) %>%
@@ -342,17 +473,27 @@ conftab3 <- confdf %>%
 #Creating table.
 #spmatch column name will be renamed on the fly
 conftab_final <- conftab2
+
+#Adding in phylum informationa and order.
+conftab_final %<>% 
+  mutate(disp_org = spmatch) %>% 
+  full_join(taxdat, by = "disp_org") %>%
+  arrange(ord) %>%
+  select(-c(ord, disp_org))
+
+conftab_final %<>% select(spmatch, disp_phy, !starts_with("spmatch|disp_phy"))
+
 #Footnote:
-genft <- "Numbers indicate number of candidates found. NAs indicate no candidates found. Circadian clock protein abbreviations: CLK (Circadian locomotor output cycles kaput), CYC (Cycle), PER (period), TIM1 (Timeless) CRY1 (Cryptochrome 1), CRY2 (Cryptochrome 2), PDP1e (PAR Domain Protein 1 epsilon), VRI (Vrille), REV-ERBa (Nuclear Receptor Subfamily 1 Group D Member 1/NR1D1), RORa (RAR Related Orphan Receptor A; NR1F1/Nuclear receptor subfamily 1 group F member 1)."
+genft <- "Numbers indicate number of candidates found. NAs indicate no candidates found. Circadian clock protein abbreviations: CLK (Circadian locomotor output cycles kaput), CYC (Cycle), PER (period), TIM1 (Timeless) CRY1 (Cryptochrome 1), CRY2 (Cryptochrome 2), PDP1e (PAR Domain Protein 1 epsilon), VRI (Vrille), REV-ERBa (Nuclear Receptor Subfamily 1 Group D Member 1/NR1D1), RORa (RAR Related Orphan Receptor A; NR1F1/Nuclear receptor subfamily 1 group F member 1). Phyla: Ar - Arthropoda; An - Annelida; Ph - Phoronida; Ch - Chordata; Ec - Echinodermata; Cn - Cnidaria."
 #Writing to object
 conftab_out <- conftab_final %>%
-  rename("Organism" = spmatch) %>%
-  arrange(Organism) %>%
-  kbl(., format = "latex", booktabs = T, align = "lccccccccccc", linesep = "") %>%
+  dplyr::rename("Organism" = spmatch, "Phylum" = disp_phy) %>%
+  #arrange(Organism) %>%
+  kbl(., format = "latex", booktabs = T, align = "lcccccccccccc", linesep = "") %>%
   column_spec(1, italic = TRUE) %>%
-  add_header_above(c(" ", "Arthropod" = 8, "Mammalian" = 2)) %>%
+  add_header_above(c(" " = 2, "Arthropod" = 8, "Mammalian" = 2)) %>%
   row_spec(row = 0, italic = FALSE, bold = TRUE) %>%
-  footnote(general = genft, threeparttable = T) %>%
+  footnote(general = genft, threeparttable = T) #%>%
   landscape()
 #Here's the core latex table.
 conftab_out
@@ -506,10 +647,11 @@ rm(ipsdat_sites)
 ipsdat %<>% mutate(mergecol = str_replace(mergecol, "grp__", "__"))
 
 
-
 #--------------------------------------------------------------------------------
 
+#flps, nls if needed.
 
+#--------------------------------------------------------------------------------
 #Merging.
 visdf <- merge(visdf, ipsdat, by = "mergecol", all.x = TRUE)
 rm(ipsdat)
@@ -546,7 +688,7 @@ visdf %>%
 
 
 #Only need Pfam + CDD-3.18 for annotations.
-#I'll need CDD to fill in for CLK alone,
+#I'll need CDD or SMART to fill in for CLK alone,
 #as it's the only case where Pfam messes up a reference.
 #I'll keep CDD.
 visdf %<>% 
@@ -751,10 +893,19 @@ visout %<>%
            feath, featcols, sig_small, start_loc, stop_loc))
 
 
+
+
+#----------------------------------------------------------------
+
+
+##IMAGE PLOTTING FINAL##
+
+
+
 #Using a for loop to plot the images.
 for(i in 1:length(unique(visout$protcat))){
   
-  #    i <- 1
+  #      i <- 1
   #selprot <- "PER"
   selprot <- unique(visout$protcat)[i]
   
@@ -763,6 +914,7 @@ for(i in 1:length(unique(visout$protcat))){
   #Selecting the plot data.
   pltdat <- visout %>%
     filter(protcat == selprot & (analysis_plat %in% c("Pfam", "CDD"))) %>%
+    #arrange(ord) %>%
     select(-c(protcat, analysis_plat))
   
   #In order to have sig_small as the in-feature label, and sig_new as the
@@ -794,6 +946,28 @@ for(i in 1:length(unique(visout$protcat))){
   #I want to str_wrap posdesc as some of these strings can be really long.
   pltdat %<>% mutate(posdesc = str_wrap(posdesc, width = 30))
   
+  #Adding the . after sp in prot_acc.
+  pltdat %<>% mutate(prot_acc = str_replace(prot_acc, "(?<=\\s)(sp)(?=\\*)", "\\1\\."))
+  
+  #Adding in the phylum data and ordering in the taxonomic order.
+  pltdat %<>% 
+    mutate(disp_org = str_extract(prot_acc, "(?<=\\*)[A-Za-z]+\\s[a-z\\.]+(?=\\*)")) %>%
+    full_join(taxdat, by = "disp_org") %>%
+    mutate(ord = ifelse(is.na(ord), 0, ord)) %>%
+    mutate(prot_acc = ifelse(!str_detect(prot_acc, "\\sREF"), paste0(prot_acc, " (", disp_phy, ")"), prot_acc))
+  pltdat %<>% arrange(ord)
+  #This stage can add NA rows since not all taxa are represented in all plots.
+  #Filtering out NA rows.
+  pltdat %<>% filter(!is.na(prot_acc))
+  pltdat %<>% select(-c(disp_phy, disp_org, ord))
+  
+  #Factoring the prot_acc column and reverse ordering it.
+  #pltdat %<>% mutate(ordloc = row_number())
+  pltdat$prot_acc <- forcats::fct_inorder(pltdat$prot_acc)
+  pltdat$prot_acc <- forcats::fct_rev(pltdat$prot_acc)
+  #pltdat$prot_acc <- factor(pltdat$prot_acc, levels = pltdat$ordloc)
+  #pltdat %<>% select(-ordloc)
+  
   #hbase = 0.2, label_size = 4
   plt <- pdomvisr(inpdat = pltdat, label_size = 5, hbase = 0.4, ylabel = "") + #size = 2, hbase = 0.2
     theme(text = ggplot2::element_text(size = 18, face = "bold"), #16
@@ -810,6 +984,17 @@ for(i in 1:length(unique(visout$protcat))){
           plot.title = element_text(vjust = 0.5)) + 
     labs(title = "") +
     guides(fill = guide_legend(title = paste0(selprot, " features"), nrow = 1, hjust = 0))
+  plt
+  
+  
+  plt$plot_env$inpdf %<>% 
+    mutate(disp_org = str_extract(prot_acc, "(?<=\\*)[A-Za-z]+\\s[a-z\\.]+(?=\\*)")) %>%
+    full_join(taxdat, by = "disp_org") %>%
+    mutate(ord = ifelse(is.na(ord), 0, ord)) %>%
+    mutate(prot_acc = ifelse(!str_detect(prot_acc, "\\sREF"), paste0(prot_acc, " (", disp_phy, ")"), prot_acc)) %>%
+    arrange(ord) %>%
+    select(-c(disp_phy, disp_org, ord))
+  
   plt
   
   #Saving PNG.
@@ -830,9 +1015,8 @@ for(i in 1:length(unique(visout$protcat))){
 }
 
 
-#End of script.
+
 
 
 
 #--------------------------------------------------------------------------------
-
