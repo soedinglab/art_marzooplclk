@@ -1,11 +1,11 @@
-uniprot_name,gene_name,upid,uniprot_status,short_id,organism,circ_role,to_keep,why_not_keep,comments,srclit
-Circadian locomoter output cycles protein kaput,Clk,O61735-1,reviewed,CLK,d_melanogaster,main,1,NA,NA,patke2019
-Protein cycle,cyc,O61734-1,reviewed,CYC,d_melanogaster,main,1,NA,"BMAL1, BMAL2 ortholog",patke2019
-Period circadian protein,per,P07663-1,reviewed,PER,d_melanogaster,main,1,NA,NA,patke2019
-Protein timeless,tim,P49021-4,reviewed,TIM1,d_melanogaster,main,1,NA,NA,patke2019
-Cryptochrome-1,cry,O77059-1,reviewed,CRY1,d_melanogaster,main,1,NA,NA,patke2019
-"Vrille, isoform A",vri,Q9VMS4-1,unreviewed,VRI,d_melanogaster,main,1,NA,Mus NFIL3 ortholog,patke2019
-"PAR-domain protein 1, isoform D",Pdp1,Q8SZT1-1,unreviewed,PDP1e,d_melanogaster,main,1,NA,Mus DBP ortholog,patke2019
-Cryptochrome 2,cry2,A0A212FAM3-1,unreviewed,CRY-2,d_plexippus,main,1,NA,D. melanogaster does not possess a CRY-2,patke2019
-Nuclear receptor subfamily 1 group D member 1,Nr1d1,Q3UV55-1,reviewed,NR1D1,m_musculus,main,1,NA,Drosophila E75B homolog (that one is not circadian),patke2019
-Nuclear receptor ROR-alpha,Rora,P51448-1,reviewed,RORa,m_musculus,main,1,NA,"Drosophila HR3 homolog (HR3 is not circadian, but RORa is)",patke2019
+"uniprot_name","gene_name","upid","uniprot_status","short_id","long_id","organism","circ_role","to_keep","why_not_keep","comments","srclit"
+"Circadian locomoter output cycles protein kaput","Clk","O61735-1","reviewed","CLK","Clock","d_melanogaster","main",1,"NA","NA","patke2019"
+"Protein cycle","cyc","O61734-1","reviewed","CYC","Cycle","d_melanogaster","main",1,"NA","BMAL1, BMAL2 ortholog","patke2019"
+"Period circadian protein","per","P07663-1","reviewed","PER","Period","d_melanogaster","main",1,"NA","NA","patke2019"
+"Protein timeless","tim","P49021-4","reviewed","TIM","Timeless-1","d_melanogaster","main",1,"NA","NA","patke2019"
+"Cryptochrome-1","cry","O77059-1","reviewed","CRY1","Cryptochrome-1","d_melanogaster","main",1,"NA","NA","patke2019"
+"Vrille, isoform A","vri","Q9VMS4-1","unreviewed","VRI","Vrille","d_melanogaster","main",1,"NA","Mus NFIL3 ortholog","patke2019"
+"PAR-domain protein 1, isoform D","Pdp1","Q8SZT1-1","unreviewed","PDP1e","PDP-1 epsilon","d_melanogaster","main",1,"NA","Mus DBP ortholog","patke2019"
+"Cryptochrome 2","cry2","A0A212FAM3-1","unreviewed","CRY2","Cryptochrome-2","d_plexippus","main",1,"NA","D. melanogaster does not possess a CRY-2","patke2019"
+"Nuclear receptor subfamily 1 group D member 2","Nr1d1","Q3UV55-1","reviewed","REV-ERBa","REV-ERBa","m_musculus","main",1,"NA","Important paralog","patke2019"
+"Nuclear receptor ROR-alpha","Rora","P51448-1","reviewed","RORa","ROR-alpha","m_musculus","main",1,"NA","Drosophila HR3 homolog (HR3 is not circadian, but RORa is)","patke2019"
