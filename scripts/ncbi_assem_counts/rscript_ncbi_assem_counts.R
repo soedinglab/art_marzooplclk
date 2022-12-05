@@ -8,10 +8,11 @@ library(stringr)
 library(tidyr)
 library(dplyr)
 library(rentrez)
+#library(reutils)
 
 
 #Reading in file containing species names and NCBI taxids.
-mypath <- "/path/to/species_taxids.csv"
+mypath <- "/home/owner/Nextcloud/laptop_rplace/eichele/art_marzooplclk/scripts/ncbi_assem_counts/species_taxids.csv"
 spdat <- read.table(file = mypath, sep = ",", header = TRUE)
 
 #Appending "txid" to the taxids since this is missing.
@@ -42,18 +43,26 @@ spdat$bioproject_accession_genomes <- NA
 #counts from NCBI.
 for(i in 1:nrow(spdat)){
   
-  #i <- 3
+  #  i <- 17
+  #  i <- 4
+  #  i <- 3
   
   #Getting counts of transcriptomes
   sterm <- paste0("tsa-master[PROP] AND ", spdat$ncbi_txid[i], "[ORGN]")
   tmp <- entrez_search(db = "nuccore", term = sterm)
-  spdat$num_transcriptomes[i] <- tmp$count
+  #spdat$num_transcriptomes[i] <- tmp$count
   #Getting associated bioproject accessions
   if(length(tmp$ids) > 0){
     tmp1 <- entrez_link(dbfrom = "nuccore", id = tmp$ids, db = "bioproject")
-    if(length(tmp1$links) > 0){
-      tmp2 <- entrez_fetch(db = "bioproject", id = tmp1$links$nuccore_bioproject, rettype = "xml", parsed = TRUE)
-      tmp3 <- entrez_summary(db = "bioproject", id = tmp1$links$nuccore_bioproject)
+    if(all(class(tmp1) == c("elink", "list"))){
+      biopids <- tmp1$links$nuccore_bioproject_tsamaster
+    }
+    if(all(class(tmp1) == c("elink_list", "list"))){
+      biopids <- tmp1[[1]]$links$nuccore_bioproject
+    }
+    if(length(biopids) > 0){
+      tmp2 <- entrez_fetch(db = "bioproject", id = biopids, rettype = "xml", parsed = TRUE)
+      tmp3 <- entrez_summary(db = "bioproject", id = biopids)
       tmp4 <- extract_from_esummary(tmp3, "project_acc")
       tmp4 <- paste0(tmp4, collapse = ",")
       spdat$bioproject_accession_transcriptomes[i] <- tmp4
@@ -62,6 +71,13 @@ for(i in 1:nrow(spdat)){
     }
   } else {
     spdat$bioproject_accession_transcriptomes[i] <- NA
+  }
+  
+  #Counting this way because multiple nuccore records can point
+  #to the same BioProject.
+  spdat$num_transcriptomes[i] <- str_count(spdat$bioproject_accession_transcriptomes[i], "PRJ[A-Z0-9]+")
+  if(is.na(spdat$num_transcriptomes[i])){
+    spdat$num_transcriptomes[i] <- 0
   }
   
   cat(spdat$organism[i], " Transcriptomes: ", tmp$count, "\n")

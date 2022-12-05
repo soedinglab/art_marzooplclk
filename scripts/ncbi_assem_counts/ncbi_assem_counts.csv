@@ -2,7 +2,7 @@
 "Acartia clausii","txid136140",NA,0,0,0,0,NA,NA,0
 "Acartia tonsa","txid136180",NA,2,1,0,0,"PRJNA407266,PRJEB20069","PRJNA407380",3
 "Asterias rubens","txid7604",NA,2,1,24049,26498,"PRJNA268905,PRJNA236087","PRJNA310366",3
-"Calanus helgolandicus","txid114068",NA,2,0,0,0,NA,NA,2
+"Calanus helgolandicus","txid114068",NA,2,0,0,0,"PRJNA744376,PRJNA640515",NA,2
 "Centropages hamatus","txid136183",NA,0,0,0,0,NA,NA,0
 "Corystes sp.","txid557244","used_genus_txid",0,0,0,0,NA,NA,0
 "Crangon crangon","txid491138",NA,1,0,0,0,"PRJNA479562",NA,1
@@ -11,8 +11,8 @@
 "Magelona mirabilis","txid46598",NA,0,0,13,1,NA,NA,0
 "Oikopleura dioica","txid34765",NA,1,1,0,0,"PRJNA269316","PRJNA12900",2
 "Phialella quadrata","txid662016",NA,0,0,0,0,NA,NA,0
-"Phoronis muelleri","txid478209",NA,1,0,0,0,NA,NA,1
+"Phoronis muelleri","txid478209",NA,1,0,0,0,"PRJNA843891",NA,1
 "Podon leuckartii","txid141400",NA,0,0,0,0,NA,NA,0
 "Poecilochaetus sp.","txid273030","used_genus_txid",0,0,0,0,NA,NA,0
 "Rathkea octopunctata","txid367925",NA,0,0,0,0,NA,NA,0
-"Temora longicornis","txid261852",NA,2,0,0,0,NA,NA,2
+"Temora longicornis","txid261852",NA,1,0,0,0,"PRJNA577564",NA,1
