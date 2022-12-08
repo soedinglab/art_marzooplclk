@@ -1,0 +1,42 @@
+"spmatch","protcat","qheader","theader","pident","evalue","bits","qlen","tlen","alnlen","qcov","tcov","fname","samp","src_isgenome"
+"Asterias_rubens","PER","SOIREF_PER_Drosophila_melanogaster_P07663_main sp|P07663|PER_DROME Period circadian protein OS=Drosophila melanogaster OX=7227 GN=per PE=1 SV=2","gi|637819989|gb|GAUU01070618.1| TSA: Asterias rubens AMR0022.45849.0.1 transcribed RNA sequence",25.4,1.474e-17,92,1224,2164,846,0.207,0.391,"Asterias_rubens_ncbi_GAUU01000000","GAUU01000000",0
+"Asterias_rubens","RORa","SOIREF_RORa_Mus_musculus_P51448_main sp|P51448|RORA_MOUSE Nuclear receptor ROR-alpha OS=Mus musculus OX=10090 GN=Rora PE=1 SV=1","gi|0|gb|GHKZ01016153.1| TSA: comp10200_c0_seq1, transcribed RNA sequence",29.9,2.033e-46,180,523,3424,1095,0.839,0.32,"Asterias_rubens_ncbi_GHKZ01000000","GHKZ01000000",0
+"Crangon_crangon","CRY1","SOIREF_CRY1_Drosophila_melanogaster_O77059_main sp|O77059|CRY1_DROME Cryptochrome-1 OS=Drosophila melanogaster OX=7227 GN=cry PE=1 SV=1","GGRU01024801.1 TSA: Crangon crangon TRINITY_DN26560_c0_g1_i1 transcribed RNA sequence",38.3,7.284e-112,374,542,2063,1521,0.97,0.737,"Crangon_crangon_ncbi_GGRU01000000","GGRU01000000",0
+"Crangon_crangon","PER","SOIREF_PER_Drosophila_melanogaster_P07663_main sp|P07663|PER_DROME Period circadian protein OS=Drosophila melanogaster OX=7227 GN=per PE=1 SV=2","GGRU01035300.1 TSA: Crangon crangon TRINITY_DN21057_c0_g3_i1 transcribed RNA sequence",26.6,3.436e-19,97,1224,2164,849,0.207,0.392,"Crangon_crangon_ncbi_GGRU01000000","GGRU01000000",0
+"Evadne_nordmanni","PDP1e",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","CLK",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","CRY1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","CRY2",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","CYC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","PDP1e",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","PER",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Hyperia_sp","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Oikopleura_dioica","CRY1","SOIREF_CRY1_Drosophila_melanogaster_O77059_main sp|O77059|CRY1_DROME Cryptochrome-1 OS=Drosophila melanogaster OX=7227 GN=cry PE=1 SV=1","gi|0|gb|GCJN01038379.1| TSA: Oikopleura dioica comp26119_c0_seq1 transcribed RNA sequence",31.8,6.063e-77,272,542,2063,1506,0.939,0.73,"Oikopleura_dioica_ncbi_GCJN01000000","GCJN01000000",0
+"Oikopleura_dioica","PER","SOIREF_PER_Drosophila_melanogaster_P07663_main sp|P07663|PER_DROME Period circadian protein OS=Drosophila melanogaster OX=7227 GN=per PE=1 SV=2","gi|0|gb|GCJN01032502.1| TSA: Oikopleura dioica comp24608_c0_seq1 transcribed RNA sequence",26.1,5.376e-11,70,1224,1987,780,0.211,0.393,"Oikopleura_dioica_ncbi_GCJN01000000","GCJN01000000",0
+"Oikopleura_dioica","REV-ERBa","SOIREF_REV-ERBa_Mus_musculus_Q3UV55_main sp|Q3UV55|NR1D1_MOUSE Nuclear receptor subfamily 1 group D member 1 OS=Mus musculus OX=10090 GN=Nr1d1 PE=1 SV=1","gi|0|gb|GCJN01042213.1| TSA: Oikopleura dioica comp27045_c0_seq1 transcribed RNA sequence",30.8,9.597e-57,214,615,1709,1044,0.769,0.611,"Oikopleura_dioica_ncbi_GCJN01000000","GCJN01000000",0
+"Oikopleura_dioica","RORa","SOIREF_RORa_Mus_musculus_P51448_main sp|P51448|RORA_MOUSE Nuclear receptor ROR-alpha OS=Mus musculus OX=10090 GN=Rora PE=1 SV=1","gi|0|gb|GCJN01042214.1| TSA: Oikopleura dioica comp27045_c0_seq2 transcribed RNA sequence",30.3,4.433e-43,170,523,1727,1158,0.855,0.671,"Oikopleura_dioica_ncbi_GCJN01000000","GCJN01000000",0
+"Oikopleura_dioica","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Oikopleura_dioica","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","CRY1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","PER",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","REV-ERBa",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","RORa",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phialella_quadrata","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phoronis_muelleri","CLK","SOIREF_CLK_Drosophila_melanogaster_O61735_main sp|O61735|CLOCK_DROME Circadian locomoter output cycles protein kaput OS=Drosophila melanogaster OX=7227 GN=Clk PE=1 SV=3","gi|0|gb|GKAW01019984.1| TSA: TRINITY_DN461_c3_g1_i13, transcribed RNA sequence",24.6,3.671e-30,133,1027,4112,1140,0.351,0.277,"Phoronis_muelleri_ncbi_GKAW01000000","GKAW01000000",0
+"Phoronis_muelleri","CRY1","SOIREF_CRY1_Drosophila_melanogaster_O77059_main sp|O77059|CRY1_DROME Cryptochrome-1 OS=Drosophila melanogaster OX=7227 GN=cry PE=1 SV=1","gi|0|gb|GKAW01066446.1| TSA: TRINITY_DN14676_c0_g1_i3, transcribed RNA sequence",37.4,1.554e-96,329,542,1619,1335,0.858,0.825,"Phoronis_muelleri_ncbi_GKAW01000000","GKAW01000000",0
+"Phoronis_muelleri","CRY2","SOIREF_CRY2_Danaus_plexippus_A0A212FAM3_main tr|A0A212FAM3|A0A212FAM3_DANPL Cryptochrome 2 OS=Danaus plexippus plexippus OX=278856 GN=KGM_208079 PE=3 SV=1","gi|0|gb|GKAW01066446.1| TSA: TRINITY_DN14676_c0_g1_i3, transcribed RNA sequence",54.5,1.183e-170,554,742,1619,1332,0.597,0.823,"Phoronis_muelleri_ncbi_GKAW01000000","GKAW01000000",0
+"Phoronis_muelleri","CYC","SOIREF_CYC_Drosophila_melanogaster_O61734_main sp|O61734|CYCL_DROME Protein cycle OS=Drosophila melanogaster OX=7227 GN=cyc PE=1 SV=2","gi|0|gb|GKAW01019984.1| TSA: TRINITY_DN461_c3_g1_i13, transcribed RNA sequence",44,4.647e-91,307,413,4112,1128,0.952,0.274,"Phoronis_muelleri_ncbi_GKAW01000000","GKAW01000000",0
+"Phoronis_muelleri","PER","SOIREF_PER_Drosophila_melanogaster_P07663_main sp|P07663|PER_DROME Period circadian protein OS=Drosophila melanogaster OX=7227 GN=per PE=1 SV=2","gi|0|gb|GKAW01019984.1| TSA: TRINITY_DN461_c3_g1_i13, transcribed RNA sequence",27.7,1.305e-19,98,1224,4112,849,0.207,0.206,"Phoronis_muelleri_ncbi_GKAW01000000","GKAW01000000",0
+"Phoronis_muelleri","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Phoronis_muelleri","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Poecilochaetus_sp","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","CRY1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","PER",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","REV-ERBa",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","RORa",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","TIM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Rathkea_octopunctata","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Temora_longicornis","RORa","SOIREF_RORa_Mus_musculus_P51448_main sp|P51448|RORA_MOUSE Nuclear receptor ROR-alpha OS=Mus musculus OX=10090 GN=Rora PE=1 SV=1","gi|0|gb|GGQN02309154.1| TSA: TRINITY_DN412095_c0_g2_i11, transcribed RNA sequence",38,5.376e-73,262,523,1578,1377,0.868,0.873,"Temora_longicornis_ncbi_GGQN02000000","GGQN02000000",0
+"Temora_longicornis","VRI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
