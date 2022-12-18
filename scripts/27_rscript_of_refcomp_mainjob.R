@@ -9,7 +9,7 @@
 rm(list = ls())
 
 #Base path for this working directory.
-mypath <- "/home/mpg08/vraghav/of_refcomp" #SET THIS PATH HERE.
+mypath <- "/path/to/of_refcomp" #SET THIS PATH HERE.
 #All relevant data--and this script--are located here or in subdirectories.
 
 

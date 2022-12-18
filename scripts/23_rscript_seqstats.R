@@ -684,7 +684,7 @@ bustab %<>% select(-V3)
 names(bustab) <- c("filename", "count")
 
 #Need to extract the BUSCO step and sample name from the filenames first.
-bustab %<>% mutate(filename = str_replace(filename, "^/cbscratch/.*/busco_", ""))
+bustab %<>% mutate(filename = str_replace(filename, "^\\/.*/.*/busco_", ""))
 
 #Can drop the entire short_summary.*$ string 'cause the 
 #necessary info is embedded in the rest of the filename string.
@@ -815,7 +815,7 @@ bt2tab %<>% select(-c(V3, V4, V5))
 names(bt2tab) <- c("filename", "count")
 
 #Need to extract the Bowtie2 step and sample name from the filenames first.
-bt2tab %<>% mutate(filename = str_replace(filename, "^/cbscratch/.*/bowtie2_", ""))
+bt2tab %<>% mutate(filename = str_replace(filename, "^\\/.*/.*/bowtie2_", ""))
 bt2tab %<>% mutate(filename = str_extract(filename, "^[A-Za-z]+\\/[A-Za-z_]+"))
 bt2tab %<>% 
   rowwise() %>% 

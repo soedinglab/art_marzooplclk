@@ -22,6 +22,13 @@
 #the FASTA files--including those of the references--in one spot.
 
 
+##IMPORTANT##
+#THIS SCRIPT NEEDS A CONDA ENVIRONMENT NAMED seqkit_conda
+#installed with the environment containing seqkit in it!!
+#SET PATH TO conda.sh here!!
+condapath <- "/path/to/miniconda3/etc/profile.d/conda.sh;"
+##
+
 #--------------------------------------------------------------------------------
 
 rm(list = ls())
@@ -108,12 +115,12 @@ soicands <- ofdat %>%
 #soicands are all sequences (including OTHREFs and SOIREFs) matched to the soirefs.
 
 #Path to OrthoFinder directory containing all the input files (including references).
-sfpath <- "/cbscratch/vraghav/newrun/outputs/orthofinder/inputs"
+sfpath <- paste0(mypath, "/", "outputs", "/", "orthofinder/inputs")
 
 #First grepping and writing out the soicands.
 
 #Creating output directory if it doesn't exist already.
-outpath <- "/cbscratch/vraghav/newrun/outputs/orthofinder/rscript_of_getsois_ofcands"
+outpath <- paste0(mypath, "/", "outputs", "/", "orthofinder/rscript_of_getsois_ofcands")
 if(!dir.exists(outpath)){dir.create(outpath)}
 
 
@@ -135,7 +142,7 @@ for(i in unique(soicands$tarname)){
   
   cat("Done!! Now grepping SOIs from ", basename(infilename), " and putting them in ", basename(outfilename), "!!\n")
   
-  mycmd <- paste0("source /home/mpg08/vraghav/miniconda3/etc/profile.d/conda.sh; conda activate seqkit_conda; seqkit grep -f ", soifilename, " ", infilename, " -o ", outfilename, "; conda deactivate") 
+  mycmd <- paste0("source ", condapath, "; conda activate seqkit_conda; seqkit grep -f ", soifilename, " ", infilename, " -o ", outfilename, "; conda deactivate") 
   
   system(mycmd)
   
@@ -147,7 +154,7 @@ for(i in unique(soicands$tarname)){
 
 #Now grepping and writing out the soirefs.
 #Putting the refs and cands in separate directories.
-outpath <- "/cbscratch/vraghav/newrun/outputs/orthofinder/rscript_of_getsois_ofrefs"
+outpath <- paste0(mypath, "/", "outputs", "/", "orthofinder/rscript_of_getsois_ofrefs")
 if(!dir.exists(outpath)){dir.create(outpath)}
 
 for(i in unique(soirefs$refname)){
@@ -168,7 +175,7 @@ for(i in unique(soirefs$refname)){
   
   cat("Done!! Now grepping SOIs from ", basename(infilename), " and putting them in ", basename(outfilename), "!!\n")
   
-  mycmd <- paste0("source /home/mpg08/vraghav/miniconda3/etc/profile.d/conda.sh; conda activate seqkit_conda; seqkit grep -f ", soifilename, " ", infilename, " -o ", outfilename, "; conda deactivate") 
+  mycmd <- paste0("source ", condapath, "; conda activate seqkit_conda; seqkit grep -f ", soifilename, " ", infilename, " -o ", outfilename, "; conda deactivate") 
   
   system(mycmd)
   

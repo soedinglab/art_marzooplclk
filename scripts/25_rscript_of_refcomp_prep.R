@@ -20,7 +20,7 @@ library(stringr)
 library(tidyr)
 library(dplyr)
 
-mypath <- "/home/mpg08/vraghav/of_refcomp"
+mypath <- "/path/to/of_refcomp"
 setwd(mypath)
 
 

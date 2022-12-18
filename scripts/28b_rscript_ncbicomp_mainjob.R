@@ -14,7 +14,7 @@ library(stringr)
 library(tidyr)
 library(dplyr)
 
-mypath <- "/home/owner/Nextcloud/laptop_rplace/eichele/art_marzooplclk/outputs/rscript_ncbicomp"
+mypath <- "/path/to/outputs/rscript_ncbicomp"
 
 mainoutdir <- paste0(mypath, "/", "outputs")
 ncbioutdir <- paste0(mainoutdir, "/", "ncbicomp")

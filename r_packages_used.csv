@@ -8,6 +8,7 @@ ggforce,0.3.3,FALSE
 ggplot2,3.3.6,FALSE
 ggplotify,0.1.0,FALSE
 ggtree,3.4.1,FALSE
+ggvenn,0.1.9,FALSE
 graphics,4.2.1,TRUE
 grDevices,4.2.1,TRUE
 magrittr,2.0.3,FALSE
@@ -41,3 +42,6 @@ showtextdb,3,FALSE
 sysfonts,0.8.8,FALSE
 ggtext,0.1.1,FALSE
 seqvisr,0.2.6,FALSE
+msa,1.28.0,FALSE
+Biostrings,2.66.0,FALSE
+gtools,3.9.4,FALSE

@@ -7,8 +7,7 @@
 rm(list = ls())
 
 #Base path for this working directory.
-#mypath <- "/home/mpg08/vraghav/rscript_ccvissum"
-mypath <- "/home/owner/Nextcloud/laptop_rplace/eichele/art_marzooplclk"
+mypath <- "/path/to/outputs"
 #All relevant data--and this script--are located here.
 
 #Setting working directory.

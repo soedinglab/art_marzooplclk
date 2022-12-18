@@ -11,20 +11,19 @@
 #the compute node's local NVMe drive.
 
 #Paths and stuff
-MYPATH="/cbscratch/vraghav/newrun";
-#ORTHOFINDER="/home/mpg08/vraghav/my_programs/OrthoFinder/orthofinder";
+MYPATH="/disk0/user0/newrun";
 
 #Jobs
 MAINJOBDIR="${MYPATH}/jobfiles";
 SPJOBDIR="${MAINJOBDIR}/of_refcomp/jobsubs";
 mkdir -p ${SPJOBDIR};
 
-#Outputs on /cbscratch
+#Outputs
 MAINOUTDIR="${MYPATH}/outputs";
 MAINSPOUTDIR="${MAINOUTDIR}/of_refcomp";
 mkdir -p ${MAINSPOUTDIR};
 
-NVMEPATH="/nvme/n00/vraghav/newrun";
+NVMEPATH="/nvme/n00/user0/newrun";
 SPOUTDIR="${NVMEPATH}/outputs/of_refcomp";
 mkdir -p ${SPOUTDIR};
 
@@ -59,15 +58,15 @@ cp ${OFRSPTREE} ${LOCSPTREE};
 
 
 #OrthoFinder run.
-source /home/mpg08/vraghav/miniconda3/etc/profile.d/conda.sh;
+source /home/somedir/user0/my_programs/miniconda3/etc/profile.d/conda.sh;
 conda activate orthofinder_conda;
 
 orthofinder -t 512 -a 512 -M msa -S diamond_ultra_sens -s ${LOCSPTREE} -y -o ${SPOUTDIR}/outputs -f ${SPOUTDIR}/inputs;
 
 conda deactivate;
 
-#Copying over the entire OrthoFinder directory to cbscratch.
-echo "\n\nCOPYING OVER OUTPUT TO CBSCRATCH!!\n\n";
+#Copying over the entire OrthoFinder directory.
+echo "\n\nCOPYING OVER OUTPUT TO DESTINATION DIRECTORY!!\n\n";
 cp -r ${SPOUTDIR}/* ${MAINSPOUTDIR};
 
 echo "\n\nALL DONE!!\n\n";
