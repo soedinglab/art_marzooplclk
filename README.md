@@ -9,7 +9,7 @@ RNA sequencing reveals circadian clocks may be widespread in marine zooplankton
 
 - Citations:
   - Manuscript: in submission.
-  - This repository: [![DOI](https://zenodo.org/badge/496647002.svg)](https://zenodo.org/badge/latestdoi/496647002)
+  - This repository: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7502741.svg)](https://doi.org/10.5281/zenodo.7502741)
 
 - **Please use our issue tracker or email us for further assistance.**
 
